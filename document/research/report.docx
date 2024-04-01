@@ -1,0 +1,18 @@
+Chức năng:
+    - Quản lí hồ sơ bệnh nhân
+    - Quản lí doanh thu
+    - Quản lí thiết bị, chi phí
+
+Yêu cầu đối với mỗi chức năng
+1. Quản lí hồ sơ của tất cả bệnh nhân
+    - Thông tin bệnh nhân: MS, Họ tên, Ngày sinh, SĐT,Địa chỉ
+    - Bệnh án: 
+    - Quá trình điều trị: 
+2. Quản lí doanh thu
+    - Thống kê doanh thu
+    - Biểu đồ doanh thu trong năm
+    - Lọc thông tin dữ liệu từ biểu đồ
+3. Quản lí thiết bị
+    - Chi phí thiết bị
+    - Chi phí vật liệu
+    - Vật liệu còn trong kho
