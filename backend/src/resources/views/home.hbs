@@ -1,0 +1,13 @@
+<div class="col-md-8">
+<h1>Profiles</h1>
+    <ul>
+        {{#each profiles}}
+            <li>{{this.ms}}</li>
+            <li>{{this.name.firstname}} {{this.name.lastname}}</li>
+            <li>{{this.phone}}</li>
+            <li>{{this.address}}</li>
+            <li>{{this.job}}</li>
+            <li>{{this.birthday.day}}/{{this.birthday.month}}/{{this.birthday.year}}</li>
+        {{/each}}
+    </ul>
+</div>
