@@ -1,9 +1,10 @@
-<div class="col-md-8">
+<div class="col">
 <h2>HỒ SƠ BỆNH NHÂN</h2>
     {{#each profiles}}
         <div class="card">
             <div class="card-body">
-            This is some text within a card body.
+                <i class="bi bi-list-ul"></i>
+                <span>{{this.name.firstname}} {{this.name.lastname}} - {{this.phone}} - MS.{{this.ms`}}</span>
         </div>
         </div> 
     {{/each}}
