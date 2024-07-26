@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
 import { Form, message } from 'antd';
 import axios from "axios";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = 'http://localhost:3001/profiles';
 
 interface ProfileType {
+  _id:string
   code: {year: number, count: number};
   fullname: string;
   yearofbirth: string;
@@ -15,7 +17,7 @@ interface ProfileType {
   record: string[];
   schedules: {
     date: string;
-    tooth: number;
+    tooth: string;
     schedule: string;
     amount: number;
     price: number;
@@ -26,13 +28,13 @@ interface ProfileType {
   }[]
 }
 
-export const useProfiles = () => {
+export const useProfilesList = () => {
   const [data, setData] = useState<ProfileType[]>([]);
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [form] = Form.useForm<ProfileType>(); // Specify form values type
   const [id, setId] = useState<string>('');
 
-
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,17 +61,25 @@ export const useProfiles = () => {
     try {
       const currentYear = ( new Date().getFullYear() ) % 100
       const values = await form.validateFields();
+      
       const profiles = await axios.get(API_URL);
       const yearProfiles = profiles.data.filter(
         (profile: ProfileType) => profile.code.year === currentYear
       )
-
       const count = yearProfiles.length + 1
       const newCode = {year:currentYear, count: count}
-      const newProfile = {...values,code: newCode}
+      const newProfile = {
+        fullname: values.fullname,
+        yearofbirth: (values.yearofbirth ? values.yearofbirth : ''),
+        sex: values.sex,
+        job: (values.job ? values.job : ''),
+        phone: (values.phone ? values.phone : ''),
+        address: (values.address ? values.address : ''),
+        code: newCode
+      }
+      console.log(newProfile)
       // Add Profile
-      const response = await axios.post(API_URL,newProfile)
-      console.log(response)
+      await axios.post(API_URL,newProfile)
       // Update Profiles
       const updatedProfiles = await axios.get(API_URL)
       setData(updatedProfiles.data);
@@ -82,7 +92,9 @@ export const useProfiles = () => {
   };
 
   const handleRowClick = (record: ProfileType) => {
-    setId((record.code.year+ '.' + record.code.count));
+    const profileId = record.code.year + '.' + record.code.count;
+    setId(profileId);
+    navigate(`/profiles/${profileId}`);
   };
 
   const handleBack = () => {

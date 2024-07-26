@@ -25,11 +25,11 @@ exports.getAllProfiles = async (req, res) => {
 
 //  Update profile
 exports.updateProfile = async (req, res) => {
-    const { fullname, birthday, address, code, job, sex, record, schedules } = req.body
+    const { fullname, yearofbirth, address, code, job, sex, record, schedules } = req.body
     try {
         const updatedProfile = await Profile.findByIdAndUpdate(
             req.params.id, 
-            { fullname, birthday, address, code, job, sex, record, schedules },
+            { fullname, yearofbirth, address, code, job, sex, record, schedules },
             { new: true }
         );
         res.json(updatedProfile);
@@ -48,4 +48,23 @@ exports.deleteProfile = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+};
+// Get profile by code
+exports.getProfileByCode = async (req, res) => {
+  const { year, count } = req.query;
+
+  if (!year || !count) {
+    return res.status(400).json({ message: 'Year and count are required' });
+  }
+
+  try {
+    const profile = await Profile.findOne({ 'code.year': parseInt(year), 'code.count': parseInt(count) });
+    if (profile) {
+      res.json(profile);
+    } else {
+      res.status(404).json({ message: 'Profile not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
