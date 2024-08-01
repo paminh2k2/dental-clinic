@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const SERVICES_API_URL = 'http://localhost:3001/services';
 const PROFILES_API_URL = 'http://localhost:3001/profiles';
+const REVENUES_API_URL = 'http://localhost:3001/revenues';
 
 interface ServiceType {
     _id?: string;
@@ -64,13 +65,12 @@ export const useDetailProfile = (id: string) => {
     const [form] = Form.useForm();
     const [data, setData] = useState<DataType | undefined>(undefined);
     const [history, setHistory] = useState<DataType['schedules']>([]);
-    const [ isVisible, setIsVisible ] = useState(false);
-    const [ isVisiblePay, setIsVisiblePay ] = useState(false)
+    const [isVisible, setIsVisible] = useState(false);
+    const [isVisiblePay, setIsVisiblePay] = useState(false);
     const [services, setServices] = useState<ServiceType[]>([]);
     const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
     const [year, count] = id.split('.').map(Number);
-    const [ curID, setCurID ] = useState(0)
-   
+    const [curID, setCurID] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -120,7 +120,8 @@ export const useDetailProfile = (id: string) => {
             }
         }
     };
-    //Modal Schedule
+
+    // Modal Schedule
     const showModal = () => {
         setIsVisible(true);
     };
@@ -153,11 +154,11 @@ export const useDetailProfile = (id: string) => {
                     ...history,
                     {
                         ...values,
-                        id:data.schedules.length + 1,
+                        id: data.schedules.length + 1,
                         amount: amountTooth,
                         total,
                         paid: 0,
-                        unpaid: total
+                        unpaid: total-0
                     }
                 ]
             };
@@ -177,35 +178,67 @@ export const useDetailProfile = (id: string) => {
             }
         }
     };
-    //Modal Pay
+
+    // Modal Pay
     const handleCancelPay = () => {
-        setIsVisiblePay(false)
-    }
+        setIsVisiblePay(false);
+        form.resetFields()
+    };
 
     const onOpenPay = (schedule: any) => {
-        setIsVisiblePay(true)
-        setCurID(schedule.id)
-    }
+
+        if ( schedule.unpaid > 0) {
+            setIsVisiblePay(true)
+        } else {
+            setIsVisiblePay(false)
+        }
+        setCurID(schedule.id);
+    };
 
     const onPay = async () => {
         try {
-            const paid = await form.validateFields();
-            history[curID-1].paid = paid
-            history[curID-1].unpaid = history[curID-1].total - paid
+            // Validate the paid field in the form and extract its value
+            const { paid } = await form.validateFields(['paid']);
+    
+            // Update the schedules with the new paid and unpaid amounts
+            const updatedSchedules = history.map((schedule) =>
+                schedule.id === curID
+                    ? { ...schedule, paid: schedule.paid + paid, unpaid: schedule.unpaid - paid }
+                    : schedule
+            );
+    
+            // Check if data is available
+            if (!data) {
+                throw new Error('Profile data is not available');
+            }
+    
+            // Create a new profile object with the updated schedules
             const newProfile = {
                 ...data,
-                schedules: [...history]
-            }
-            await axios.put(`${PROFILES_API_URL}/${data?._id}`, newProfile);
-            message.success('Thêm thành công');
+                schedules: updatedSchedules
+            };
+    
+            // Update the profile in the database
+            await axios.put(`${PROFILES_API_URL}/${data._id}`, newProfile);
+    
+            // Display a success message and update the state
+            message.success('Cập nhật thành công');
             setHistory(newProfile.schedules);
             form.resetFields();
             setIsVisiblePay(false);
         } catch (error: any) {
-            message.error('Cập nhật thất bại!', error.message);
+            // Handle errors and display an appropriate error message
+            console.error('Cập nhật thất bại:', error);
+            if (error.response && error.response.data) {
+                message.error(`Cập nhật thất bại: ${error.response.data.message}`);
+            } else {
+                message.error('Cập nhật thất bại. Vui lòng kiểm tra lại dữ liệu!');
+            }
         }
-    }
+    };
     
+    
+
     return {
         records,
         currencyFormatter,

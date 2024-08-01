@@ -30,7 +30,7 @@ const DetailProfile: React.FC = () => {
     } = useDetailProfile(validID);
 
     return (
-        <Layout.Content className='py-3 px-2 m-3 bg-white'>
+        <Layout.Content className='py-3 px-2 m-3 bg-white h-[44rem] rounded-lg'>
             <div className='flex'>
                 <Button icon={<ArrowLeftOutlined />} onClick={handleBack} />
                 <p className="text-lg font-bold ml-2">{id} - {data?.fullname}</p>
@@ -65,27 +65,30 @@ const DetailProfile: React.FC = () => {
                     <p className="font-semibold">KẾ HOẠCH ĐIỀU TRỊ</p>
                     <Button className="ml-2" icon={<PlusCircleOutlined />} onClick={showModal}/>
                 </div>
-                <Table
-                    virtual
-                    pagination={false}
-                    scroll={{ y: 600, x: 1000 }}
-                    dataSource={history}
-                    rowKey='id'
-                    onRow={(schedule) => ({
-                        onClick: () =>onOpenPay(schedule),
-                    })}
-                >
-                    <Column title='STT' dataIndex='id' width={60}/>
-                    <Column title='Ngày thực hiện' dataIndex='date' />
-                    <Column title='Răng' dataIndex='tooth' />
-                    <Column title='Kế hoạch điều trị' dataIndex='schedule' />
-                    <Column title='Số lượng' dataIndex='amount' />
-                    <Column title='Đơn giá' dataIndex='price' />
-                    <Column title='Giảm giá' dataIndex='discount' />
-                    <Column title='Tổng' dataIndex='total' />
-                    <Column title='Đã thanh toán' dataIndex='paid' />
-                    <Column title='Chưa thanh toán' dataIndex='unpaid' />
-                </Table>
+                <div className='mt-2 h-[20rem] overflow-y-auto bg-white rounded-lg'>
+                    <Table
+                        virtual
+                        pagination={false}
+                        scroll={{ y: 600, x: 1000 }}
+                        dataSource={history}
+                        rowKey='id'
+                        onRow={(schedule) => ({
+                            onClick: () =>onOpenPay(schedule),
+                        })}
+                    >
+                        <Column title='STT' dataIndex='id' width={60}/>
+                        <Column title='Ngày thực hiện' dataIndex='date' />
+                        <Column title='Răng' dataIndex='tooth' />
+                        <Column title='Kế hoạch điều trị' dataIndex='schedule' />
+                        <Column title='Số lượng' dataIndex='amount' />
+                        <Column title='Đơn giá' dataIndex='price' />
+                        <Column title='Giảm giá' dataIndex='discount' />
+                        <Column title='Tổng' dataIndex='total' />
+                        <Column title='Đã thanh toán' dataIndex='paid' />
+                        <Column title='Chưa thanh toán' dataIndex='unpaid' />
+                    </Table>
+                </div>
+
             </div>
             <Modal
                 title='THÊM KẾ HOẠCH ĐIỀU TRỊ'

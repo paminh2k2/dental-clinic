@@ -1,40 +1,44 @@
-import { Avatar, Button, Image, Menu, MenuProps } from "antd"
-import Logo from '~/assets/Logo.png'
 import {
-    HomeFilled,
-    ScheduleFilled,
-    FolderFilled, 
+    FolderFilled,
     FundFilled,
-    ProfileOutlined,
-    LogoutOutlined, 
+    HomeFilled,
+    LogoutOutlined,
+    ScheduleFilled,
     SettingFilled
-} from "@ant-design/icons"
+} from "@ant-design/icons";
+import { Avatar, Button, Menu, MenuProps } from "antd";
 import { useNavigate } from 'react-router-dom';
+import Logo from '~/assets/Logo.png';
 
 const items = [
     {
         key: 'home',
-        label: 'Home',
+        label: 'Trang chủ',
         icon: <HomeFilled />,
     },
     {
         key: 'appointment',
-        label: 'Appointment',
+        label: 'Lịch hẹn',
         icon: <ScheduleFilled />,
     },
     {
         key: 'profiles',
-        label: 'Profiles',
+        label: 'Hồ sơ',
         icon: <FolderFilled />,
     },
     {
-        key: 'static',
-        label: 'Static',
+        key: 'report',
+        label: 'Báo cáo',
         icon: <FundFilled />,
+        children: [
+            {key:'revenue', label: 'Doanh thu'},
+            {key:'expense', label: 'Chi phí'},
+            {key: 'store', label: 'Kho'}
+        ]
     },
     {
-        key: 'setting',
-        label: 'Setting',
+        key: 'services',
+        label: 'Dịch vụ',
         icon: <SettingFilled />,
     },
 ]
@@ -42,10 +46,12 @@ const items = [
 const pathMap: { [key: string]: string } = {
     'home': '/',
     'appointment': '/appointment',
-    'profiles': '/profiles',
-    'static': '/static',
     'expense': '/expense',
-    'setting': '/setting'
+    'revenue': '/revenue',
+    'store': '/store',
+    'profiles': '/profiles',
+    'report': '/report',
+    'services': '/services',
 };
 
 const SideBar = () => {
@@ -69,19 +75,11 @@ const SideBar = () => {
                 </div>
                 <Menu
                     onClick={handleMenuClick}
-                    style={{border: 0}}
-                >
-                    {items.map(item => (
-                        <Menu.Item
-                            key={item.key}
-                            icon={item.icon}
-                            
-                        >
-                            {item.label}
-                        </Menu.Item>
-                    ))}
-                </Menu>
-                    
+                    style={{border: 0, width: 150 }}
+                    defaultSelectedKeys={['home']}
+                    items={items}
+                    mode="inline"
+                />
             </div>
             <div className="flex justify-center items-center">
                 <Button className="bg-transparent text-[#8d8598]" icon={<LogoutOutlined/>}/>

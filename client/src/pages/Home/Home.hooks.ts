@@ -1,17 +1,67 @@
-import dayjs, {Dayjs} from 'dayjs'
-import { useState } from 'react'
-import { initalData } from './data'
-import { Form, message, Button } from 'antd'
+import { Form, message } from 'antd';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+
+const APPOINTMENTS_API_URL =  'http://localhost:3001/appointments';
+const SERVICES_API_URL =  'http://localhost:3001/services';
+
+interface ServiceType {
+    _id?: string;
+    service: string;
+    price: {
+        min: number;
+        max: number;
+    };
+    note: string;
+}
+
+interface DataType {
+    _id: string;
+    fullname: string;
+    date: string;
+    time: string;
+    services: string[]
+}
 
 export const useHome = () => {
-    const [data, setData] = useState(initalData)
-    const [isVisible, setIsVisible] = useState(false)
-    const [ isEdit , setIsEdit ] = useState(false)
-    const [ editingKey, setEditingKey ] = useState('')
     const [form] = Form.useForm()
+    const [ data, setData] = useState<DataType[]>([])
+    const [ services, setServices ] = useState<ServiceType[]>([])
+    const [isVisible, setIsVisible] = useState(false)
+    const [ appointmentSelected, setAppointmentSelected ] = useState<DataType>()
 
-    const showModal = () => {
+    useEffect(() => {
+        const fecthData = async () => {
+            const today = new Date()
+            const todayString = `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
+            try {
+                const res = await axios.get(APPOINTMENTS_API_URL)
+                setData(res.data.filter((item: DataType) => (item.date === todayString)))
+            } catch (error) {
+                message.error('Error fetching appointments. Please try again')
+            }
+        }
+
+        const fetchServices = async () => {
+            try {
+                const res = await axios.get(SERVICES_API_URL)
+                setServices(res.data)
+            } catch (error) {
+                message.error('Error fetching services. Please try again')
+            }
+        }
+        fecthData()
+        fetchServices()
+    }, [data])
+
+    const showModal = (record: any) => {
         setIsVisible(true)
+        setAppointmentSelected(record)
+        form.setFieldsValue({
+            date: record.date,
+            time: record.time,
+            services: record.services
+        });
     }
 
     const handleCancel = () => {
@@ -19,65 +69,40 @@ export const useHome = () => {
         form.resetFields()
     }
 
-    const handleAdd = () => {
-        form.validateFields()
-            .then( values => {
-                const date: Dayjs = values.date
-                const time: Dayjs = values.time
-
-                const newAppointment = {
-                    key: (data.length + 1).toString(),
-                    name: values.name,
-                    date: date,
-                    time: time,
-                    services: values.services
-                }
-
-                setData([...data, newAppointment])
-                message.success('Add appointment successfully')
-                setIsVisible(false)
-                form.resetFields()
-            })
-            .catch(info => {
-                message.error('Please fill all required fields')
-            })
+    const handleCompleted = async ( record: any ) => {
+        try {
+            await axios.delete(`${APPOINTMENTS_API_URL}/${record._id}`)
+            const res = await axios.get(APPOINTMENTS_API_URL)
+            setData(res.data)
+        } catch (error: any) {
+            message.error('Hành động thất bại:', error)
+        }
     }
 
-    const handleDelete = ( key: string ) => {
-        const newData = data.filter( item => item.key !== key )
-        setData( newData )
-        message.success('Appointment deleted successfully!')
-    }
-
-    const handleEdit = (record: any) => {
-        setIsEdit(true);
-        setEditingKey(record.key);
-        setIsVisible(true);
-        form.setFieldsValue({
-            name: record.name,
-            date: dayjs(record.date),
-            time: dayjs(record.time),
-            services: record.services
-        });
+    const handleEdit = async () => {
+        try {
+            const values = await form.validateFields()
+            const editAppointment = {
+                ...values
+            }
+            await axios.put(`${APPOINTMENTS_API_URL}/${appointmentSelected?._id}`, editAppointment)
+            message.success('Chỉnh sửa thành công')
+            form.resetFields()
+            setIsVisible(false)
+        } catch (error) {
+            console.error('Chỉnh sửa thất bại:', error)
+        }
     };
-
-    const today = dayjs().startOf('day');
-    
-    const filteredData = data.filter(appointment =>
-        dayjs(appointment.date).isSame(today, 'day')
-    );
 
     return {
         data,
+        services,
         form,
-        isEdit,
         isVisible,
-        editingKey,
-        filteredData,
+        appointmentSelected,
         showModal,
         handleCancel,
-        handleAdd,
-        handleDelete,
+        handleCompleted,
         handleEdit,
     }
 }

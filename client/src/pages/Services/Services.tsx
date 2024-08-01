@@ -1,7 +1,8 @@
-import { Button, Layout, Modal, Form, Input, Table, InputNumber } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Button, Form, Input, InputNumber, Layout, Modal, Table } from 'antd';
 import Column from 'antd/es/table/Column';
-import { PlusCircleOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { useSetting } from './Setting.hooks';
+import React from 'react';
+import { useServices } from './Services.hook';
 
 interface DataType {
     service: string;
@@ -12,24 +13,23 @@ interface DataType {
     note: string;
 }
 
-
-const Setting = () => {
-    const { 
-        data, 
-        isVisible, 
-        form, 
-        currencyFormatter, 
-        showModal, 
-        handleAddOrUpdateService, 
+const Services: React.FC = () => {
+    const {
+        data,
+        isVisible,
+        form,
+        currencyFormatter,
+        showModal,
+        handleAddOrUpdateService,
         handleCancel,
         handleEditService,
         handleDeleteService
 
-    } = useSetting()
+    } = useServices()
     return (
         <Layout.Content className='py-3 px-6 mx-3'>
             <Button icon={<PlusCircleOutlined />} type='primary' onClick={showModal}>Add Service</Button>
-            <div className='mt-3'>
+            <div className='mt-2 bg-white rounded-lg h-[41rem] overflow-y-auto'>
                 <Table
                     virtual
                     pagination={false}
@@ -105,4 +105,4 @@ const Setting = () => {
     );
 }
 
-export default Setting;
+export default Services;

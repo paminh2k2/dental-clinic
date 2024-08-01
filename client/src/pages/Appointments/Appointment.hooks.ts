@@ -1,77 +1,141 @@
-import dayjs, {Dayjs} from 'dayjs'
-import { useState } from 'react'
-import { initalData } from './data'
-import { Form, message, Button } from 'antd'
-import { title } from 'process'
+import { Form, message } from 'antd';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+
+const SERVICES_API_URL = 'http://localhost:3001/services';
+const APPOINTMENT_API_URL = 'http://localhost:3001/appointments';
+
+interface ServiceType {
+    _id?: string;
+    service: string;
+    price: {
+        min: number;
+        max: number;
+    };
+    note: string;
+}
+
+interface AppointmentType {
+    _id: string
+    fullname: string
+    date: string
+    time: string
+    services: string[]
+}
 
 export const useAppointments = () => {
-    const [data, setData] = useState(initalData)
-    const [isVisible, setIsVisible] = useState(false)
-    const [ isEdit , setIsEdit ] = useState(false)
-    const [ editingKey, setEditingKey ] = useState('')
     const [form] = Form.useForm()
+    const [services, setServices] = useState<ServiceType[]>([]);
+    const [data, setData] = useState<AppointmentType[]>()
+    const [isVisibleAdd, setIsVisibleAdd] = useState(false)
+    const [isVisibleEdit, setIsVisibleEdit] = useState(false)
+    const [ editingKey, setEditingKey ] = useState('')
+    const [ appointmentSelected, setAppointmentSelected ] = useState<AppointmentType>()
+    useEffect(() => {
 
-    const showModal = () => {
-        setIsVisible(true)
+        const fetchData = async () => {
+            try {
+                const res = await axios.get(APPOINTMENT_API_URL)
+                setData(res.data)
+            } catch (error) {
+                message.error('Error fetching appointment. Please try again!')
+            }
+        }
+
+        const fetchServices = async () => {
+            try {
+                const res = await axios.get(SERVICES_API_URL)
+                setServices(res.data)
+            } catch (error) {
+                message.error('Error fetching services. Please try again!')
+            }
+        }
+        fetchData()
+        fetchServices()
+    }, [data])
+    //Show modal
+    const showModalAdd = () => {
+        setIsVisibleAdd(true)
     }
 
-    const handleCancel = () => {
-        setIsVisible(false)
+    const showModalEdit = (record: any) => {
+        setIsVisibleEdit(true)
+        setAppointmentSelected(record)
+        setEditingKey(record.key);
+        setIsVisibleEdit(true);
+        form.setFieldsValue({
+            date: record.date,
+            time: record.time,
+            services: record.services
+        });
+    }
+    // Cancel modal
+    const handleCancelAdd = () => {
+        setIsVisibleAdd(false)
         form.resetFields()
     }
 
-    const handleAdd = () => {
-        form.validateFields()
-            .then( values => {
-                const date: Dayjs = values.date
-                const time: Dayjs = values.time
-
-                const newAppointment = {
-                    key: (data.length + 1).toString(),
-                    name: values.name,
-                    date: date,
-                    time: time,
-                    services: values.services
-                }
-
-                setData([...data, newAppointment])
-                message.success('Add appointment successfully')
-                setIsVisible(false)
-                form.resetFields()
-            })
-            .catch(info => {
-                message.error('Please fill all required fields')
-            })
+    const handleCancelEdit = () => {
+        setIsVisibleEdit(false)
+        form.resetFields()
+    }
+    // Add modal
+    const handleAdd = async () => {
+        try {
+            const values =await form.validateFields()
+            const newAppointment = {
+                ...values
+            }
+            await axios.post(APPOINTMENT_API_URL, newAppointment)
+            message.success('Thêm thành công');
+            form.resetFields()
+            setIsVisibleAdd(false)
+        } catch (error) {
+            console.error('Thêm thất bại:', error)
+        }
+        
     }
 
-    const handleDelete = ( key: string ) => {
-        const newData = data.filter( item => item.key !== key )
-        setData( newData )
-        message.success('Appointment deleted successfully!')
-    }
-
-    const handleEdit = (record: any) => {
-        setIsEdit(true);
-        setEditingKey(record.key);
-        setIsVisible(true);
-        form.setFieldsValue({
-            name: record.name,
-            date: dayjs(record.date),
-            time: dayjs(record.time),
-            services: record.services
-        });
+    // Edit modal
+    const handleEdit = async () => {
+        try {
+            const values = await form.validateFields()
+            const editAppointment = {
+                ...values
+            }
+            await axios.put(`${APPOINTMENT_API_URL}/${appointmentSelected?._id}`, editAppointment)
+            message.success('Chỉnh sửa thành công')
+            form.resetFields()
+            setIsVisibleEdit(false)
+        } catch (error) {
+            console.error('Chỉnh sửa thất bại:', error)
+        }
     };
+    // Delete modal
+    const handleDelete = async (record: any) => {
+        try {
+            await axios.delete(`${APPOINTMENT_API_URL}/${record._id}`)
+            const res = await axios.get(APPOINTMENT_API_URL)
+            setData(res.data)
+        } catch (error: any) {
+            message.error('Xóa thất bại:', error)
+        }
+    }
 
     return {
-        data,
-        isVisible,
-        isEdit,
-        editingKey,
         form,
-        showModal,
-        handleCancel,
+        services,
+        data,
+        isVisibleAdd,
+        isVisibleEdit,
+        editingKey,
+        appointmentSelected,
+        showModalAdd,
+        showModalEdit,
+        handleCancelAdd,
+        handleCancelEdit,
         handleAdd,
-        handleDelete,
         handleEdit,
+        handleDelete,
     }
 }

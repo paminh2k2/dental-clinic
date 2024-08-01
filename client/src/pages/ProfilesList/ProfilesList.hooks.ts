@@ -39,14 +39,27 @@ export const useProfilesList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const profiles = await axios.get(API_URL)
-        setData(profiles.data);
+        const res = await axios.get(API_URL)
+        const sortData = res.data.sort((a: any,b: any) => {
+          if (a.code.year > b.code.year) {
+            return a.code.year - b.code.year
+          } else if( a.code.year < b.code.year) {
+            return b.code.year - a.code.year
+          } else {
+            if (a.code.count > b.code.count) {
+              return b.code.count - a.code.count
+            } else {
+              return a.code.count - b.code.count
+            }
+          }
+        })
+        setData(sortData);
       } catch (err) {
         console.error('Failed to fetch profiles:', err);
       }
     };
     fetchData();
-  }, []);
+  }, [data]);
 
   const showModal = () => {
     setIsVisible(true);

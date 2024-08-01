@@ -1,6 +1,6 @@
 import { Form, message } from "antd";
-import { useEffect, useState } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
 
 const API_URL = 'http://localhost:3001/services';
 
@@ -14,7 +14,7 @@ interface DataType {
     note: string;
 }
 
-export const useSetting = () => {
+export const useServices = () => {
     const [data, setData] = useState<DataType[]>([]);
     const [isVisible, setIsVisible] = useState(false);
     const [editingService, setEditingService] = useState<DataType | null>(null);

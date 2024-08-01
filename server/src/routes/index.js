@@ -1,11 +1,11 @@
 const profilesRouter = require('./profilesRoutes')
 const servicesRouter = require('./servicesRoutes')
-const revenuesRotuer = require('./revenuesRoutes')
+const appointmentsRouter = require('./appointmentsRoutes')
 
 function route(app) {
     app.use('/profiles', profilesRouter)
     app.use('/services', servicesRouter)
-    app.use('/revenues', revenuesRotuer)
+    app.use('/appointments', appointmentsRouter)
 }
 
 module.exports = route

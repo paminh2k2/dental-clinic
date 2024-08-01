@@ -1,120 +1,99 @@
-import React, { useState } from 'react';
-import { Button, Input, Layout, Table, Modal, Form, DatePicker, TimePicker, Select, message } from 'antd';
-import { EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, EditOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Layout, Modal, Select, Table } from 'antd';
 import Column from 'antd/es/table/Column';
-import dayjs, { Dayjs } from 'dayjs';
 import { useHome } from './Home.hooks';
 const { Option } = Select;
-
-interface DataType {
-    key: string;
-    name: string;
-    date: Dayjs;
-    time: Dayjs;
-    services: string[];
-}
-
-const initialData: DataType[] = [
-    {
-        key: '1',
-        name: 'Pham Anh Minh',
-        date: dayjs('2002-01-01', 'YYYY-MM-DD'),
-        time: dayjs('09:20', 'HH:mm'),
-        services: ['Cao voi']
-    }
-];
 
 const Home = () => {
     const {
         data,
+        services,
         form,
-        isEdit,
         isVisible,
-        editingKey,
-        filteredData,
+        appointmentSelected,
         showModal,
-        handleAdd,
         handleEdit,
         handleCancel,
-        handleDelete,
+        handleCompleted,
     } = useHome()
 
     return (
         <Layout.Content className='py-3 px-6 mx-3'>
-            <div className='mt-3 h-[41rem] overflow-y-hidden bg-white'>
+            <div className='mt-3 h-[41rem] overflow-y-hidden bg-white rounded-lg'>
                 <Table
                     virtual
                     pagination={false}
                     scroll={{ y: 600, x: 1080 }}
-                    dataSource={filteredData}
+                    dataSource={data}
                     
                 >
-                    <Column title="Họ và tên" dataIndex='name' />
+                    <Column title="Họ và tên" dataIndex='fullname' width={216}/>
                     <Column
                         title="Ngày hẹn"
                         dataIndex='date'
-                        render={(date) => dayjs.isDayjs(date) ? date.format('DD-MM-YYYY') : dayjs(date).format('DD-MM-YYYY')}
+                        width={150}
                     />
                     <Column
                         title="Giờ hẹn"
                         dataIndex='time'
-                        render={(time) => dayjs.isDayjs(time) ? time.format('HH:mm') : dayjs(time).format('HH:mm')}
+                        width={120}
                     />
                     <Column title="Dịch vụ" dataIndex='services' render={(services) => services.join(', ')} />
                     <Column
-                        title="Edit"
-                        render={(_, record: DataType) => (
-                            <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+                        title="Chỉnh sửa"
+                        width={120}
+                        render={(_, record) => (
+                            <Button icon={<EditOutlined />} onClick={() => showModal(record)} />
                         )}
                     />
                     <Column
-                        title="Cancel"
-                        render={(_, record: DataType) => (
-                            <Button onClick={() => handleDelete(record.key)}>Cancel</Button>
+                        title="Hoàn thành"
+                        width={120}
+                        render={(_, record) => (
+                            <Button icon={<CheckCircleOutlined/>} onClick={() => handleCompleted(record)}/>
                         )}
                     />
                 </Table>
             </div>
 
             <Modal
-                title={isEdit ? "Edit Appointment" : "Add Appointment"}
+                title={`Chỉnh sửa lịch hẹn - ${appointmentSelected?.fullname}`}
                 visible={isVisible}
                 onCancel={handleCancel}
-                onOk={handleAdd}
-                okText={isEdit ? "Update" : "Add"}
-                cancelText="Cancel"
+                onOk={handleEdit}
             >
-                <Form form={form} layout="vertical">
-                    <Form.Item
-                        name="name"
-                        label="Tên khách hàng"
-                        rules={[{ required: true, message: 'Vui lòng nhập tên khách hàng!' }]}
-                    >
-                        <Input placeholder="Nhập tên khách hàng" />
-                    </Form.Item>
-                    <Form.Item
-                        name="date"
-                        label="Ngày hẹn"
-                        rules={[{ required: true, message: 'Vui lòng chọn ngày hẹn!' }]}
-                    >
-                        <DatePicker format="DD-MM-YYYY" />
-                    </Form.Item>
-                    <Form.Item
-                        name="time"
-                        label="Giờ hẹn"
-                        rules={[{ required: true, message: 'Vui lòng chọn giờ hẹn!' }]}
-                    >
-                        <TimePicker format="HH:mm" />
-                    </Form.Item>
+                <Form
+                    form={form}
+                    layout="vertical"
+                    requiredMark='optional'
+                >
+                    <div className='flex justify-between'>
+                        <Form.Item
+                            name="date"
+                            label="Ngày hẹn: DD-MM-YYYY"
+                            rules={[{ required: true, message: 'Vui lòng chọn ngày hẹn!' }]}
+                            >
+                            <Input placeholder='Nhập ngày hẹn' className='w-56'/>
+                        </Form.Item>
+                        <Form.Item
+                            name="time"
+                            label="Giờ hẹn: (Giờ)h(Phút)p"
+                            rules={[{ required: true, message: 'Vui lòng chọn giờ hẹn!' }]}
+                            >
+                            <Input placeholder='Nhập giờ hẹn' className='w-56'/>
+                        </Form.Item>
+                    </div>
                     <Form.Item
                         name="services"
                         label="Dịch vụ"
                         rules={[{ required: true, message: 'Vui lòng chọn dịch vụ!' }]}
                     >
                         <Select mode="tags" placeholder="Chọn hoặc nhập dịch vụ">
-                            <Option value="Cao voi">Cao voi</Option>
-                            <Option value="Tẩy trắng răng">Tẩy trắng răng</Option>
-                            <Option value="Khám răng">Khám răng</Option>
+                            {services.map((service: any) => {
+                                return (
+                                    <Option value={service.service}>{service.service}</Option>
+                                )
+                            })}
                         </Select>
                     </Form.Item>
                 </Form>

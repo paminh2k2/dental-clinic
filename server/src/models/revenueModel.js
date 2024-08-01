@@ -1,13 +1,16 @@
 const mongoose = require('mongoose')
 
-const dataSchema = new mongoose.Schema({
-    day: {type: Number, required: true, unique: true},
-    total: {type: Number, required: true, unique: true}
+const dateSchema = new mongoose.Schema({
+    day: {type: Number},
+    month: {type: Number},
+    year: {type: Number}
 })
 
 const revenueSchema = new mongoose.Schema({
-    date: { type: String, required: true, unique: true },
-    dataSet: [dataSchema]
+    fullname: {type: String},
+    service: { type: String},
+    date: {type: dateSchema},
+    
 })
 
 const Revenue = mongoose.model('Revenue', revenueSchema)

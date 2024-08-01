@@ -39,15 +39,8 @@ const Profiles: React.FC = () => {
     handleCancel,
   } = useProfilesList();
 
-  // Sắp xếp dữ liệu theo thuộc tính `code`
-  const sortedData = [...data].sort((a, b) => {
-    const codeA = a.code.year * 100 + a.code.count;
-    const codeB = b.code.year * 100 + b.code.count;
-    return codeA - codeB;
-  });
-
   // Lọc dữ liệu đã sắp xếp theo `searchQuery`
-  const filteredProfiles = sortedData.filter(profile =>
+  const filteredProfiles = data.filter(profile =>
     profile.fullname.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
